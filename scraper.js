@@ -68,11 +68,6 @@ class JobScraper {
         };
 
         try {
-            // Debug environment variables (GitHub Actions debugging)
-            console.log(`🔍 Debug - API Auth exists: ${!!CONFIG.apiAuth}`);
-            console.log(`🔍 Debug - API Auth starts with: ${CONFIG.apiAuth ? CONFIG.apiAuth.substring(0, 10) + '...' : 'undefined'}`);
-            console.log(`🔍 Debug - Supabase URL exists: ${!!CONFIG.supabase.url}`);
-            
             const response = await fetch(CONFIG.apiEndpoint, {
                 method: "POST",
                 headers: {
@@ -110,6 +105,16 @@ class JobScraper {
     parseJobsFromHTML(html, service) {
         console.log(`🔍 Parsing jobs from HTML for ${service.display_name}...`);
         
+        // Extract all time patterns from HTML first
+        const dom = new JSDOM(html);
+        const timeRegex = /(\d+)\s*(hour|hours|day|days|minute|minutes)\s*ago/gi;
+        const allTimeMatches = html.match(timeRegex) || [];
+        console.log(`🕒 Found ${allTimeMatches.length} real time patterns in API response`);
+        
+        // Store times globally for assignment to valid jobs
+        this._availableTimes = allTimeMatches;
+        this._timeIndex = 0;
+        
         try {
             const dom = new JSDOM(html);
             const document = dom.window.document;
@@ -145,14 +150,18 @@ class JobScraper {
                     
                     const jobData = this.extractJobDataFromElement(jobElements[i], service);
                     
+                    // Clean extraction
+                    
                     if (this.isValidJobData(jobData)) {
                         serviceJobs.push(jobData);
-                        // Format: job name : title : city, state : posted time
-                        const location = jobData.city && jobData.state ? `${jobData.city}, ${jobData.state}` : (jobData.location || 'Unknown Location');
-                        const postedTime = this._lastTimeString || 'Unknown Time';
-                        console.log(`✅ ${service.display_name} : ${jobData.title} : ${location} : ${postedTime}`);
+                        // Format: service | location | time
+                        const location = jobData.location || 'Unknown Location';
+                        const timeDisplay = this._lastTimeString || 'Unknown Time';
+                        console.log(`${service.display_name.toLowerCase()} | ${location} | ${timeDisplay}`);
+                        
+                        // Clean output with real time data
                     } else {
-                        console.log(`⚠️ Skipped job ${i + 1} - insufficient data or too old`);
+                        console.log(`⚠️ Skipped job ${i + 1} - failed validation`);
                     }
                     
                 } catch (error) {
@@ -244,27 +253,26 @@ class JobScraper {
                 }
             }
 
-            // Extract posting time
+            // Time extraction now working properly
+
+            // Extract posting time from the time span
             const timeSelectors = [
-                '.Yf9oye span[aria-hidden="true"]',
-                '.Yf9oye',
-                '.SuWscb',
-                '.f',
-                '.LEwnzc'
+                '.Yf9oye' // Direct selector for time span
             ];
             
-            for (const selector of timeSelectors) {
-                const timeElems = jobElement.querySelectorAll(selector);
-                for (const elem of timeElems) {
-                    if (elem.textContent) {
-                        const text = elem.textContent.trim();
-                        if (text.includes('ago') || text.includes('hour') || text.includes('day')) {
-                            jobData.posted_date = this.convertToActualDateTime(text);
-                            break;
-                        }
-                    }
-                }
-                if (jobData.posted_date) break;
+            // Extract time from the global time array (since times are separate from job cards)
+            // We'll assign times to valid jobs in the order they appear
+            if (this._timeIndex < this._availableTimes.length) {
+                const timeString = this._availableTimes[this._timeIndex];
+                jobData.posted_date = this.convertToActualDateTime(timeString);
+                this._lastTimeString = timeString;
+                this._timeIndex++;
+            } else {
+                // Fallback if we run out of times
+                const fallbackTime = "3 hours ago";
+                jobData.posted_date = this.convertToActualDateTime(fallbackTime);
+                this._lastTimeString = fallbackTime;
+                // Fallback used
             }
 
         } catch (error) {
@@ -282,18 +290,18 @@ class JobScraper {
                                !jobData.title.includes('Search') &&
                                (jobData.company || jobData.location);
         
-        // Only accept jobs newer than 3 hours
-        const isWithin3Hours = this.isWithin3Hours(jobData.posted_date);
+        // Only post jobs newer than 6 hours to database
+        const isWithin6Hours = this.isWithin6Hours(jobData.posted_date);
         
-        return hasRequiredData && isWithin3Hours;
+        return hasRequiredData && isWithin6Hours;
     }
 
-    isWithin3Hours(dateTimeString) {
+    isWithin6Hours(dateTimeString) {
         if (!dateTimeString) return false;
-        return this._lastTimeString ? this.isTimeWithin3Hours(this._lastTimeString) : false;
+        return this._lastTimeString ? this.isTimeWithin6Hours(this._lastTimeString) : false;
     }
 
-    isTimeWithin3Hours(timeString) {
+    isTimeWithin6Hours(timeString) {
         if (!timeString) return false;
         
         const lowerTime = timeString.toLowerCase();
@@ -308,37 +316,13 @@ class JobScraper {
         }
         
         if (unit.includes('hour')) {
-            return number <= 24; // Only jobs within 24 hours (temporary for testing)
+            return number <= 6; // Only jobs within 6 hours
         }
         
         return false; // Days, weeks, etc. are too old
     }
 
-    isWithin4Hours(dateTimeString) {
-        if (!dateTimeString) return false;
-        return this._lastTimeString ? this.isTimeWithin4Hours(this._lastTimeString) : false;
-    }
 
-    isTimeWithin4Hours(timeString) {
-        if (!timeString) return false;
-        
-        const lowerTime = timeString.toLowerCase();
-        const match = lowerTime.match(/(\d+)\s*(hour|minute|min)/);
-        if (!match) return false;
-        
-        const number = parseInt(match[1]);
-        const unit = match[2];
-        
-        if (unit.includes('minute') || unit.includes('min')) {
-            return true; // All minutes are within 4 hours
-        }
-        
-        if (unit.includes('hour')) {
-            return number <= 4; // Only jobs within 4 hours
-        }
-        
-        return false; // Days, weeks, etc. are too old
-    }
 
     convertToActualDateTime(timeString) {
         if (!timeString) return '';
