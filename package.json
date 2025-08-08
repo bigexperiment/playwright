@@ -1,0 +1,24 @@
+{
+  "name": "api-jobs-scraper",
+  "version": "2.0.0",
+  "description": "Simple API-based job scraper using Decodo service",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "scrape": "node scraper.js"
+  },
+  "dependencies": {
+    "csv-writer": "^1.6.0",
+    "dotenv": "^17.2.1",
+    "fs-extra": "^11.2.0",
+    "jsdom": "^26.1.0"
+  },
+  "keywords": [
+    "scraping",
+    "google-jobs",
+    "api",
+    "decodo"
+  ],
+  "author": "",
+  "license": "MIT"
+}

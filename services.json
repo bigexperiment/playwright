@@ -1,0 +1,82 @@
+{
+  "services": [
+    {
+      "name": "instacart",
+      "display_name": "Instacart",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=instacart+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "instacart_jobs",
+      "enabled": true,
+      "description": "Instacart delivery driver jobs",
+      "validationWords": ["instacart"]
+    },
+    {
+      "name": "doordash",
+      "display_name": "DoorDash",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=dasher+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "doordash_jobs",
+      "enabled": true,
+      "description": "DoorDash delivery driver jobs",
+      "validationWords": ["delivery", "dasher", "doordash"]
+    },
+    {
+      "name": "caviar",
+      "display_name": "Caviar",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=caviar+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "caviar_jobs",
+      "enabled": true,
+      "description": "Caviar delivery driver jobs",
+      "validationWords": []
+    },
+    {
+      "name": "shipt",
+      "display_name": "Shipt",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=shipt+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "shipt_jobs",
+      "enabled": true,
+      "description": "Shipt delivery driver jobs",
+      "validationWords": []
+    },
+    {
+      "name": "amazon_flex",
+      "display_name": "Amazon Flex",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=amazon+flex+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "amazon_flex_jobs",
+      "enabled": true,
+      "description": "Amazon Flex delivery driver jobs",
+      "validationWords": []
+    },
+    {
+      "name": "grubhub",
+      "display_name": "Grubhub",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=grubhub+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "grubhub_jobs",
+      "enabled": true,
+      "description": "Grubhub delivery driver jobs",
+      "validationWords": []
+    },
+    {
+      "name": "roadie",
+      "display_name": "Roadie",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=roadie+driver+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "roadie_jobs",
+      "enabled": true,
+      "description": "Roadie delivery driver jobs",
+      "validationWords": []
+    },
+    {
+      "name": "spark_delivery",
+      "display_name": "Spark Delivery",
+      "url": "https://www.google.com/search?sca_esv=87f102440c8210d8&biw=965&bih=900&sxsrf=AE3TifM423aSppUTIqugWiSXxL90OtNa3Q:1754178174770&q=spark+delivery+jobs+UNITED+STATES+since+yesterday+since+yesterday+since+yesterday&uds=AOm0WdE2fekQnsyfYEw8JPYozOKzhMhNpjYzoTfdcsGW6pSAH7-jbZtP0Crawv0h7cpIlsHwN08upaLtECAOtpp-syLXmBj8mjuK6kfHoL1N5q232oh9ZqbAzjUTFDSIpCQRKFjR55NHgk5MzFu9mQcSqn7pbGXfUHCZNHE8HefYa-i1xfYsssdTa0aeC6bAY9muEGgyqZeLa3MMjm5ix90kBfYim7q9pfWe1X5cdJ26gW4qOWWazuJji_lAggz0CnbPvcRoUvTkVwZqTWRJfx18vREf5ddQrwpxlDj0R0cYnqQKtvkidI6D0QF5AWCS0pKfmH0W_NdxJH8_1EvvL_tGDn3t107Uglxa2Gd5FlqPmGU2PHbTILr1VIJnFlywywGd0bVwFpIm2L1&udm=8&sa=X&ved=2ahUKEwiDn-v3pu2OAxXDO0QIHTgOO1MQkbEKegQIGBAC&jbr=sep:0",
+      "table": "spark_delivery_jobs",
+      "enabled": true,
+      "description": "Spark Delivery (Walmart) delivery driver jobs",
+      "validationWords": ["spark", "walmart"]
+    }
+  ],
+  "settings": {
+    "timeout_seconds": 60,
+    "max_scrolls": 10,
+    "scroll_delay_min": 100,
+    "scroll_delay_max": 200
+  }
+}
