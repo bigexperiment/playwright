@@ -1,0 +1,58 @@
+name: 🤖 Automated Job Scraper
+
+on:
+  # Schedule: Every 2 hours from 4 AM to 6 PM EST (9 AM to 11 PM UTC)
+  schedule:
+    - cron: '0 9,11,13,15,17,19,21,23 * * *'  # 4am, 6am, 8am, 10am, 12pm, 2pm, 4pm, 6pm EST
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  scrape-jobs:
+    name: 🔍 Scrape All Job Services
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci
+        
+      - name: 🌍 Set Environment Variables
+        env:
+          API_AUTH: ${{ secrets.API_AUTH }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          echo "API_AUTH=$API_AUTH" >> $GITHUB_ENV
+          echo "SUPABASE_URL=$SUPABASE_URL" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_KEY=$SUPABASE_SERVICE_KEY" >> $GITHUB_ENV
+          
+      - name: 🚀 Run Job Scraper
+        run: |
+          echo "🕐 Starting job scraper at $(date)"
+          echo "🌎 Current timezone: $(date +'%Z %z')"
+          echo "🕐 EST time: $(TZ='America/New_York' date)"
+          node scraper.js
+          
+      - name: 📊 Upload Results as Artifacts (Optional)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: job-scraper-results-${{ github.run_number }}
+          path: output/
+          retention-days: 7
+          
+      - name: ✅ Job Complete
+        run: |
+          echo "🎉 Job scraping completed successfully!"
+          echo "📅 Run completed at: $(date)"
+          echo "🕐 EST time: $(TZ='America/New_York' date)"
