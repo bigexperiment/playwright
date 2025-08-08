@@ -68,6 +68,11 @@ class JobScraper {
         };
 
         try {
+            // Debug environment variables (GitHub Actions debugging)
+            console.log(`🔍 Debug - API Auth exists: ${!!CONFIG.apiAuth}`);
+            console.log(`🔍 Debug - API Auth starts with: ${CONFIG.apiAuth ? CONFIG.apiAuth.substring(0, 10) + '...' : 'undefined'}`);
+            console.log(`🔍 Debug - Supabase URL exists: ${!!CONFIG.supabase.url}`);
+            
             const response = await fetch(CONFIG.apiEndpoint, {
                 method: "POST",
                 headers: {
@@ -303,7 +308,7 @@ class JobScraper {
         }
         
         if (unit.includes('hour')) {
-            return number <= 3; // Only jobs within 3 hours
+            return number <= 24; // Only jobs within 24 hours (temporary for testing)
         }
         
         return false; // Days, weeks, etc. are too old
