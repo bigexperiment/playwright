@@ -554,6 +554,44 @@ class JobScraper {
         }
     }
 
+    formatCurrentTimeString() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+
+    async sendNtfyRunSummary(perServiceSummary) {
+        try {
+            const topicUrl = 'https://ntfy.sh/dhikurpokhari';
+            const ranAtMsg = `Scraper ran at ${this.formatCurrentTimeString()}.`;
+            const countsMsg = perServiceSummary.length > 0
+                ? perServiceSummary.map(s => `${s.name} ${s.qualified}/${s.total}`).join(', ')
+                : 'No services scraped';
+
+            // First message: run time
+            await fetch(topicUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain', 'Priority': 'low' },
+                body: ranAtMsg
+            });
+            console.log(`📱 Sent ntfy summary header: ${ranAtMsg}`);
+
+            // Second message: per-app counts
+            await fetch(topicUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain', 'Priority': 'low' },
+                body: countsMsg
+            });
+            console.log(`📱 Sent ntfy summary counts: ${countsMsg}`);
+        } catch (error) {
+            console.log(`❌ Error sending ntfy summary: ${error.message}`);
+        }
+    }
+
     async saveResults(service, jobs) {
         if (jobs.length === 0) {
             console.log(`⚠️ No jobs to save for ${service.display_name}`);
@@ -630,6 +668,7 @@ class JobScraper {
             console.log(`📡 Using Decodo API service\n`);
             
             let allJobs = [];
+            const perServiceSummary = [];
             
             for (let i = 0; i < this.services.length; i++) {
                 const service = this.services[i];
@@ -643,6 +682,7 @@ class JobScraper {
                 
                 if (!html) {
                     console.log(`❌ Failed to fetch HTML for ${service.display_name}, skipping...\n`);
+                    perServiceSummary.push({ name: service.display_name, total: 0, qualified: 0 });
                     continue;
                 }
                 
@@ -665,14 +705,13 @@ class JobScraper {
                     console.log(`   Total jobs found: ${totalJobsFound}`);
                     console.log(`   Qualified jobs posted: ${jobs.length}`);
                     console.log(`   Sample job: "${jobs[0].title}" at ${jobs[0].company || 'Unknown'}`);
+                    perServiceSummary.push({ name: service.display_name, total: totalJobsFound, qualified: jobs.length });
                 } else {
                     console.log(`⚠️ No valid jobs found for ${service.display_name}`);
                     console.log(`   Total jobs found: ${totalJobsFound}`);
                     console.log(`   Qualified jobs posted: 0`);
+                    perServiceSummary.push({ name: service.display_name, total: totalJobsFound, qualified: 0 });
                 }
-                
-                // Send ntfy notification
-                await this.sendNtfyNotification(service, totalJobsFound, jobs.length);
                 
                 // Delay between services
                 if (i < this.services.length - 1) {
@@ -707,6 +746,9 @@ class JobScraper {
             console.log(`✅ No proxy costs!`);
             console.log(`✅ Anti-detection handled by Decodo!`);
             console.log(`📁 Check the output directory for results.`);
+
+            // Send only two ntfy notifications for the entire run
+            await this.sendNtfyRunSummary(perServiceSummary);
             
         } catch (error) {
             console.log(`❌ Scraping error: ${error.message}`);
