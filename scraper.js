@@ -592,6 +592,40 @@ class JobScraper {
         }
     }
 
+    // Spark-specific helpers
+    isTimeWithinHours(relativeString, limitHours) {
+        if (!relativeString) return false;
+        const s = String(relativeString).toLowerCase();
+        const m = s.match(/(\d+)\s*(hour|hours|minute|min|minutes)/);
+        if (!m) return false;
+        const n = parseInt(m[1]);
+        const unit = m[2];
+        if (unit.startsWith('min')) return true; // any minutes are < 2 hours
+        if (unit.startsWith('minute')) return true;
+        if (unit.startsWith('hour')) return n <= limitHours;
+        return false;
+    }
+
+    async sendNtfySparkAlert(city, state, relativeString) {
+        try {
+            const topicUrl = 'https://ntfy.sh/dhikurpokhari';
+            const loc = [city, state].filter(Boolean).join(', ');
+            const rel = relativeString || 'recently';
+            const body = `Alert! Spark job found in ${loc} in last ${rel}!`;
+            await fetch(topicUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Priority': 'high'
+                },
+                body
+            });
+            console.log(`🚨 Sent Spark alert: ${body}`);
+        } catch (error) {
+            console.log(`❌ Error sending Spark alert: ${error.message}`);
+        }
+    }
+
     async saveResults(service, jobs) {
         if (jobs.length === 0) {
             console.log(`⚠️ No jobs to save for ${service.display_name}`);
@@ -697,6 +731,17 @@ class JobScraper {
                     
                     // Insert into Supabase database
                     await this.insertJobsToSupabase(service, jobs);
+
+                    // Spark-only: send high-priority alert if any job is within 2 hours
+                    if (service.name === 'spark_delivery') {
+                        for (const j of jobs) {
+                            const within2h = this.isTimeWithinHours(j.found_time, 2);
+                            if (within2h) {
+                                await this.sendNtfySparkAlert(j.city, j.state, j.found_time);
+                                break; // send only one alert per run
+                            }
+                        }
+                    }
                     
                     // Save to files (JSON/CSV)
                     await this.saveResults(service, jobs);
