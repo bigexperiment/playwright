@@ -152,7 +152,7 @@ class JobScraper {
                     
                     // Clean extraction
                     
-                    if (this.isValidJobData(jobData)) {
+                    if (this.isValidJobData(jobData, service)) {
                         serviceJobs.push(jobData);
                         // Format: service | location | time
                         const location = jobData.location || 'Unknown Location';
@@ -265,12 +265,14 @@ class JobScraper {
             if (this._timeIndex < this._availableTimes.length) {
                 const timeString = this._availableTimes[this._timeIndex];
                 jobData.posted_date = this.convertToActualDateTime(timeString);
+                jobData.found_time = timeString;
                 this._lastTimeString = timeString;
                 this._timeIndex++;
             } else {
                 // Fallback if we run out of times
                 const fallbackTime = "3 hours ago";
                 jobData.posted_date = this.convertToActualDateTime(fallbackTime);
+                jobData.found_time = fallbackTime;
                 this._lastTimeString = fallbackTime;
                 // Fallback used
             }
@@ -282,7 +284,7 @@ class JobScraper {
         return jobData;
     }
 
-    isValidJobData(jobData) {
+    isValidJobData(jobData, service) {
         // Check required data
         const hasRequiredData = jobData.title && 
                                jobData.title.length > 3 && 
@@ -292,8 +294,17 @@ class JobScraper {
         
         // Only post jobs newer than 6 hours to database
         const isWithin6Hours = this.isWithin6Hours(jobData.posted_date);
+
+        // Validation words filter per service (if provided)
+        let passesValidationWords = true;
+        if (service && Array.isArray(service.validationWords) && service.validationWords.length > 0) {
+            const lowerTitle = (jobData.title || '').toLowerCase();
+            passesValidationWords = service.validationWords.some(word =>
+                typeof word === 'string' && lowerTitle.includes(word.toLowerCase())
+            );
+        }
         
-        return hasRequiredData && isWithin6Hours;
+        return hasRequiredData && isWithin6Hours && passesValidationWords;
     }
 
     isWithin6Hours(dateTimeString) {
@@ -408,10 +419,11 @@ class JobScraper {
                 city: job.city,
                 state: job.state,
                 source_url: null, // We don't have source URLs in current implementation
-                fingerprint: this.generateFingerprint(job)
+                fingerprint: this.generateFingerprint(job),
+                found_time: job.found_time || null
             }));
 
-            const response = await fetch(`${CONFIG.supabase.url}/rest/v1/${service.table}`, {
+            let response = await fetch(`${CONFIG.supabase.url}/rest/v1/${service.table}`, {
                 method: 'POST',
                 headers: {
                     'apikey': CONFIG.supabase.serviceKey,
@@ -428,6 +440,31 @@ class JobScraper {
                 // Handle duplicate key errors gracefully
                 if (response.status === 409 && errorText.includes('duplicate key')) {
                     console.log(`⚠️ Some jobs already exist in ${service.table} (duplicates skipped)`);
+                } else if (response.status === 400 && /found_time|column .* does not exist/i.test(errorText)) {
+                    // Fallback: retry without found_time if the column doesn't exist yet
+                    console.log(`ℹ️ '${service.table}' missing column 'found_time'. Retrying insert without it.`);
+                    const fallbackJobs = supabaseJobs.map(({ found_time, ...rest }) => rest);
+                    response = await fetch(`${CONFIG.supabase.url}/rest/v1/${service.table}`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': CONFIG.supabase.serviceKey,
+                            'Authorization': `Bearer ${CONFIG.supabase.serviceKey}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(fallbackJobs)
+                    });
+
+                    if (!response.ok) {
+                        const retryText = await response.text();
+                        if (response.status === 409 && retryText.includes('duplicate key')) {
+                            console.log(`⚠️ Some jobs already exist in ${service.table} (duplicates skipped)`);
+                        } else {
+                            throw new Error(`Supabase insert failed (retry without found_time): ${response.status} - ${retryText}`);
+                        }
+                    } else {
+                        console.log(`✅ Successfully inserted ${jobs.length} jobs into ${service.table} (without found_time)`);
+                    }
                 } else {
                     throw new Error(`Supabase insert failed: ${response.status} - ${errorText}`);
                 }
@@ -531,6 +568,7 @@ class JobScraper {
                 { id: 'state', title: 'State' },
                 { id: 'location', title: 'Full Location' },
                 { id: 'posted_date', title: 'Posted Date/Time' },
+                { id: 'found_time', title: 'Found Time' },
                 { id: 'scraped_at', title: 'Scraped At' }
             ]
         });
@@ -565,6 +603,7 @@ class JobScraper {
                 { id: 'state', title: 'State' },
                 { id: 'location', title: 'Full Location' },
                 { id: 'posted_date', title: 'Posted Date/Time' },
+                { id: 'found_time', title: 'Found Time' },
                 { id: 'scraped_at', title: 'Scraped At' }
             ]
         });
