@@ -27,6 +27,7 @@ class JobScraper {
     constructor() {
         this.jobsData = [];
         this.services = [];
+        this.maxHoursWindow = Number(process.env.MAX_HOURS) > 0 ? Number(process.env.MAX_HOURS) : 6;
         
         fs.ensureDirSync(CONFIG.outputDir);
         this.loadServices();
@@ -327,7 +328,7 @@ class JobScraper {
         }
         
         if (unit.includes('hour')) {
-            return number <= 6; // Only jobs within 6 hours
+            return number <= this.maxHoursWindow; // Only jobs within configured window
         }
         
         return false; // Days, weeks, etc. are too old
@@ -423,15 +424,26 @@ class JobScraper {
                 found_time: job.found_time || null
             }));
 
-            let response = await fetch(`${CONFIG.supabase.url}/rest/v1/${service.table}`, {
+            // Deduplicate within batch by fingerprint to avoid 409 on bulk insert
+            const fingerprintToJob = new Map();
+            for (const row of supabaseJobs) {
+                if (!fingerprintToJob.has(row.fingerprint)) {
+                    fingerprintToJob.set(row.fingerprint, row);
+                }
+            }
+            const dedupedJobs = Array.from(fingerprintToJob.values());
+
+            const insertUrl = `${CONFIG.supabase.url}/rest/v1/${service.table}?on_conflict=fingerprint`;
+
+            let response = await fetch(insertUrl, {
                 method: 'POST',
                 headers: {
                     'apikey': CONFIG.supabase.serviceKey,
                     'Authorization': `Bearer ${CONFIG.supabase.serviceKey}`,
                     'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
+                    'Prefer': 'return=minimal, resolution=ignore-duplicates'
                 },
-                body: JSON.stringify(supabaseJobs)
+                body: JSON.stringify(dedupedJobs)
             });
 
             if (!response.ok) {
@@ -443,14 +455,14 @@ class JobScraper {
                 } else if (response.status === 400 && /found_time|column .* does not exist/i.test(errorText)) {
                     // Fallback: retry without found_time if the column doesn't exist yet
                     console.log(`ℹ️ '${service.table}' missing column 'found_time'. Retrying insert without it.`);
-                    const fallbackJobs = supabaseJobs.map(({ found_time, ...rest }) => rest);
-                    response = await fetch(`${CONFIG.supabase.url}/rest/v1/${service.table}`, {
+                    const fallbackJobs = dedupedJobs.map(({ found_time, ...rest }) => rest);
+                    response = await fetch(insertUrl, {
                         method: 'POST',
                         headers: {
                             'apikey': CONFIG.supabase.serviceKey,
                             'Authorization': `Bearer ${CONFIG.supabase.serviceKey}`,
                             'Content-Type': 'application/json',
-                            'Prefer': 'return=minimal'
+                            'Prefer': 'return=minimal, resolution=ignore-duplicates'
                         },
                         body: JSON.stringify(fallbackJobs)
                     });
@@ -469,7 +481,7 @@ class JobScraper {
                     throw new Error(`Supabase insert failed: ${response.status} - ${errorText}`);
                 }
             } else {
-                console.log(`✅ Successfully inserted ${jobs.length} jobs into ${service.table}`);
+                console.log(`✅ Successfully inserted ${dedupedJobs.length} jobs into ${service.table}`);
             }
 
         } catch (error) {
